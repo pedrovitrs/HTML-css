@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja de Bijuterias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #ff66b2;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+        }
+        .container {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .product {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 1rem;
+            padding: 1rem;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .product img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .product h3 {
+            margin: 0.5rem 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        .product p {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        .product button {
+            background-color: #ff66b2;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        .product button:hover {
+            background-color: #e0559d;
+        }
+        form {
+            max-width: 500px;
+            margin: 2rem auto;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        form input, form button {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        form button {
+            background-color: #ff66b2;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #e0559d;
+        }
+        .result {
+            max-width: 500px;
+            margin: 2rem auto;
+            background-color: #e7f9e7;
+            padding: 1rem;
+            border: 1px solid #b6e2b6;
+            border-radius: 8px;
+            color: #3a773a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Loja de Bijuterias</h1>
+        <p>Encontre as bijuterias perfeitas para cada ocasião!</p>
+    </header>
+    <div class="container">
+        <div class="product">
+            <img src="imagem1.jpg" alt="Brinco Elegante">
+            <h3>Brinco Elegante</h3>
+            <p>Um lindo brinco para complementar seu estilo.</p>
+            <button>Comprar</button>
+        </div>
+        <div class="product">
+            <img src="imagem2.jpg" alt="Colar Dourado">
+            <h3>Colar Dourado</h3>
+            <p>Adicione um toque de sofisticação ao seu visual.</p>
+            <button>Comprar</button>
+        </div>
+        <div class="product">
+            <img src="imagem3.jpg" alt="Pulseira Charmosa">
+            <h3>Pulseira Charmosa</h3>
+            <p>Acessório perfeito para o dia a dia.</p>
+            <button>Comprar</button>
+        </div>
+    </div>
+    <form id="purchaseForm">
+        <label for="name">Nome Completo:</label>
+        <input type="text" id="name" name="name" required>
+        
+        <label for="address">Endereço:</label>
+        <input type="text" id="address" name="address" required>
+        
+        <label for="city">Cidade:</label>
+        <input type="text" id="city" name="city" required>
+        
+        <label for="postalCode">CEP:</label>
+        <input type="text" id="postalCode" name="postalCode" required>
+        
+        <button type="submit">Finalizar Compra</button>
+    </form>
+    <div class="result" id="result" style="display: none;">
+        <h2>Informações do Pedido</h2>
+        <p><strong>Nome:</strong> <span id="displayName"></span></p>
+        <p><strong>Endereço:</strong> <span id="displayAddress"></span></p>
+        <p><strong>Cidade:</strong> <span id="displayCity"></span></p>
+        <p><strong>CEP:</strong> <span id="displayPostalCode"></span></p>
+    </div>
+    <script>
+        const form = document.getElementById('purchaseForm');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Obter os valores dos campos
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const postalCode = document.getElementById('postalCode').value;
+
+            // Dados a serem enviados para o backend
+            const data = { name, address, city, postalCode };
+
+            // Enviar os dados para o servidor usando fetch
+            const response = await fetch('http://127.0.0.1:5000/salvar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            // Verificar a resposta do servidor
+            if (response.ok) {
+                alert("Dados salvos com sucesso!");
+                form.reset();
+            } else {
+                alert("Ocorreu um erro ao salvar os dados.");
+            }
+        });
+    </script>
+</body>
+</html>

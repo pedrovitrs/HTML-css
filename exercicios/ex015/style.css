@@ -1,0 +1,20 @@
+
+
+body{
+        background-image: url(estudos.ico);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px;
+}
+h1{
+     color: brown;
+     background-color: aqua;
+}
+h2{
+    color: antiquewhite;
+}
+p{
+     text-align: justify;
+}
