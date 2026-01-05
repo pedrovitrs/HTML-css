@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro Mensal</title>
+
+    <!-- ================== CSS ================== -->
+    <style>
+        /* RESET BÁSICO */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f2f2f2;
+            padding: 10px;
+        }
+
+        /* CONTAINER PRINCIPAL */
+        .app {
+            max-width: 500px;
+            margin: auto;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        /* FORMULÁRIO */
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 18px;
+            background: #2ecc71;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .danger {
+            background: #e74c3c;
+        }
+
+        /* FILTRO */
+        .filter {
+            margin-top: 15px;
+        }
+
+        /* LISTA DE DESPESAS */
+        ul {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        li {
+            background: #f8f8f8;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info {
+            font-size: 14px;
+        }
+
+        .info strong {
+            font-size: 16px;
+        }
+
+        .remove {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* RESUMO */
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #333;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .summary p {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        /* RESPONSIVO */
+        @media (min-width: 600px) {
+            body {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>📊 Controle de Despesas</h1>
+
+    <!-- FORMULÁRIO -->
+    <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" id="descricao" placeholder="Ex: Supermercado">
+    </div>
+
+    <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="number" id="valor" step="0.01">
+    </div>
+
+    <div class="form-group">
+        <label>Categoria</label>
+        <select id="categoria">
+            <option value="Alimentação">Alimentação</option>
+            <option value="Moradia">Moradia</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Outros">Outros</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="data">
+    </div>
+
+    <button onclick="adicionarDespesa()">Adicionar Despesa</button>
+
+    <!-- FILTRO -->
+    <div class="filter">
+        <label>Filtrar por categoria</label>
+        <select id="filtro" onchange="atualizarTela()">
+            <option value="Todas">Todas</option>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Moradia">Moradia</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Lazer">Lazer</option>
+            <option value="Outros">Outros</option>
+        </select>
+    </div>
+
+    <!-- LISTA -->
+    <ul id="lista"></ul>
+
+    <!-- RESUMO -->
+    <div class="summary">
+        <p>Total Geral: R$ <span id="totalGeral">0.00</span></p>
+        <p>Alimentação: R$ <span id="totalAlimentacao">0.00</span></p>
+        <p>Moradia: R$ <span id="totalMoradia">0.00</span></p>
+        <p>Transporte: R$ <span id="totalTransporte">0.00</span></p>
+        <p>Lazer: R$ <span id="totalLazer">0.00</span></p>
+        <p>Outros: R$ <span id="totalOutros">0.00</span></p>
+    </div>
+
+    <button class="danger" onclick="limparTudo()">Limpar Todas</button>
+
+</div>
+
+<!-- ================== JAVASCRIPT ================== -->
+<script>
+    // CARREGAR DADOS
+    let despesas = JSON.parse(localStorage.getItem("despesas")) || [];
+
+    // SALVAR NO LOCALSTORAGE
+    function salvar() {
+        localStorage.setItem("despesas", JSON.stringify(despesas));
+    }
+
+    // ADICIONAR DESPESA
+    function adicionarDespesa() {
+        const descricao = document.getElementById("descricao").value.trim();
+        const valor = parseFloat(document.getElementById("valor").value);
+        const categoria = document.getElementById("categoria").value;
+        const data = document.getElementById("data").value;
+
+        if (!descricao || isNaN(valor) || valor <= 0 || !data) {
+            alert("Preencha todos os campos corretamente.");
+            return;
+        }
+
+        despesas.push({
+            descricao,
+            valor,
+            categoria,
+            data
+        });
+
+        document.getElementById("descricao").value = "";
+        document.getElementById("valor").value = "";
+        document.getElementById("data").value = "";
+
+        atualizarTela();
+    }
+
+    // REMOVER
+    function remover(index) {
+        despesas.splice(index, 1);
+        atualizarTela();
+    }
+
+    // LIMPAR TUDO
+    function limparTudo() {
+        if (confirm("Deseja apagar todas as despesas?")) {
+            despesas = [];
+            atualizarTela();
+        }
+    }
+
+    // ATUALIZAR INTERFACE
+    function atualizarTela() {
+        const lista = document.getElementById("lista");
+        const filtro = document.getElementById("filtro").value;
+        lista.innerHTML = "";
+
+        let totais = {
+            Alimentação: 0,
+            Moradia: 0,
+            Transporte: 0,
+            Lazer: 0,
+            Outros: 0
+        };
+
+        despesas.forEach((d, index) => {
+            totais[d.categoria] += d.valor;
+
+            if (filtro === "Todas" || filtro === d.categoria) {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <div class="info">
+                        <strong>${d.descricao}</strong><br>
+                        ${d.categoria} | ${d.data}<br>
+                        R$ ${d.valor.toFixed(2)}
+                    </div>
+                    <button class="remove" onclick="remover(${index})">X</button>
+                `;
+                lista.appendChild(li);
+            }
+        });
+
+        document.getElementById("totalAlimentacao").innerText = totais.Alimentação.toFixed(2);
+        document.getElementById("totalMoradia").innerText = totais.Moradia.toFixed(2);
+        document.getElementById("totalTransporte").innerText = totais.Transporte.toFixed(2);
+        document.getElementById("totalLazer").innerText = totais.Lazer.toFixed(2);
+        document.getElementById("totalOutros").innerText = totais.Outros.toFixed(2);
+
+        const totalGeral =
+            totais.Alimentação +
+            totais.Moradia +
+            totais.Transporte +
+            totais.Lazer +
+            totais.Outros;
+
+        document.getElementById("totalGeral").innerText = totalGeral.toFixed(2);
+
+        salvar();
+    }
+
+    atualizarTela();
+</script>
+
+</body>
+</html>
